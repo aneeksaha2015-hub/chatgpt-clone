@@ -19,17 +19,19 @@ async function createMemory({ vectors, metadata , messageId }) {
 
 }
 
-async function queryMemory({queryVector, limit = 5 , metadata}) {
-
+async function queryMemory({ queryVector, limit = 5, metadata }) {
     const data = await cohortChatGptIndex.query({
         vector: queryVector,
-        topK : limit ,
-        filter : metadata ? { metadata } : undefined,
-        includeMetadata : true
-    })
+        topK: limit,
+        filter: metadata
+            ? Object.fromEntries(
+                Object.entries(metadata).map(([k, v]) => [k, { $eq: String(v) }])
+              )
+            : undefined,
+        includeMetadata: true,
+    });
 
-    return data.matches
-
+    return data.matches;
 }
 
 module.exports = {

@@ -32,23 +32,22 @@ function initSocketServer(httpServer) {
 
   io.on("connection", (socket) => {
     socket.on("ai-message", async (messagePayload) => {
-
       const message = await messageModel.create({
-                chat : messagePayload.chat ,
-                user : socket.user._id ,
-                content : messagePayload.content,
-                role : "user",
-            })
+        chat: messagePayload.chat,
+        user: socket.user._id,
+        content: messagePayload.content,
+        role: "user",
+      });
 
       const vectors = await aiService.generateVector(messagePayload.content);
 
       const memory = await queryMemory({
-        queryVector : vectors,
+        queryVector: vectors,
         limit: 3,
-        metadata : {
-          user : socket.user._id,
-        }
-      })
+        metadata: {
+          user: socket.user._id,
+        },
+      });
 
       await createMemory({
         vectors,
@@ -71,52 +70,57 @@ function initSocketServer(httpServer) {
       ).reverse();
 
       const stm = chatHistory.map((item) => {
-          return {
-            role: item.role,
-            parts: [{ text: item.content }],
-          };
-        })
+        return {
+          role: item.role,
+          parts: [{ text: item.content }],
+        };
+      });
 
-      const ltm = [
-        {
-          "role" : "user",
-          parts : [ { text: `
-            
-            these are some previous messages from the chat, use them to generate a response!
+      const ltm =
+        memory.length > 0
+          ? [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `These are some previous messages from the chat, use them as context:\n${memory.map((item) => `- ${item.metadata.text}`).join("\n")}`,
+                  },
+                ],
+              },
+              {
+                role: "model",
+                parts: [
+                  {
+                    text: "Got it! I'll use that context to better answer your question.",
+                  },
+                ],
+              },
+            ]
+          : [];
 
-            ${memory.map(item => item.metadata.text).join("\n")}
+      console.log(ltm[0]);
+      console.log(stm);
 
-            ` } ]
-        }
-      ]
+      const response = await aiService.generateResponse([...ltm, ...stm]);
 
-      console.log(ltm[ 0 ])
-      console.log(stm)
+      const responseMessage = await messageModel.create({
+        chat: messagePayload.chat,
+        user: socket.user._id,
+        content: response,
+        role: "model",
+      });
 
-
-      const response = await aiService.generateResponse([ ...ltm,...stm ]);
-
-
-
-       const responseMessage = await messageModel.create({
-                chat : messagePayload.chat ,
-                user : socket.user._id ,
-                content : response ,
-                role : "model",
-            })
-
-      
-      const  responseVectors = await aiService.generateVector(response)
+      const responseVectors = await aiService.generateVector(response);
 
       await createMemory({
-         vectors : responseVectors ,
-         messageId : responseMessage._id,
-         metadata: {
+        vectors: responseVectors,
+        messageId: responseMessage._id,
+        metadata: {
           chat: messagePayload.chat,
           user: socket.user._id,
           text: response,
-         }
-      })
+        },
+      });
 
       socket.emit("ai-response", {
         content: response,
