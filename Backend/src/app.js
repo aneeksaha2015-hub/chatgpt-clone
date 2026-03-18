@@ -21,5 +21,14 @@ app.use(express.static(path.join(__dirname, '../public')))
 app.use('/api/auth', authRoutes)
 app.use('/api/chat', chatRoutes)
 
+app.get('/', (req, res) => {
+  res.send('Backend is running 🚀');
+});
+
+app.get("*name", (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+
 
 module.exports = app;
