@@ -382,57 +382,85 @@
 /* 🔥 MOBILE FIX */
 @media (max-width: 768px) {
 
-  /* ✅ FIX CONTAINER (MAIN ISSUE) */
   .auth-container {
-    min-height: 100dvh;   /* fixes viewport bug */
+    min-height: 100dvh;
     height: auto;
-
     display: flex;
-    align-items: flex-start;   /* prevents cut */
+    align-items: center;      /* ← center instead of flex-start */
     justify-content: center;
-
-    padding: 40px 1rem;   /* better spacing */
-    overflow-y: auto;     /* allow scroll */
+    padding: 24px 1rem;
+    overflow-y: auto;
   }
 
-  /* ✅ YOUR EXISTING CARD (KEEP + SMALL IMPROVEMENT) */
   .auth-card {
     width: 100%;
-    max-width: 340px;
-    padding: 1.4rem 1.2rem;
-    border-radius: 16px;
-
-    /* 🔥 important */
+    max-width: 100%;          /* ← full width on mobile */
+    padding: 1.6rem 1.4rem;
+    border-radius: 20px;
     margin: 0 auto;
   }
 
   .auth-card h1 {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
   }
 
   .auth-card-subtitle {
-    font-size: 0.75rem;
-    margin-bottom: 1rem;
+    font-size: 0.78rem;
+    margin-bottom: 1.2rem;
   }
 
   .auth-logo-icon {
-    width: 42px;
-    height: 42px;
-    font-size: 1.2rem;
+    width: 46px;
+    height: 46px;
+    font-size: 1.3rem;
+  }
+
+  .auth-form {
+    gap: 0.9rem;
   }
 
   .form-group input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.85rem;
+    padding: 0.72rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
   }
 
   .btn-submit {
-    padding: 0.65rem;
-    font-size: 0.85rem;
+    padding: 0.78rem;
+    font-size: 0.88rem;
+    border-radius: 10px;
   }
 
   .auth-card p {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
+    margin-top: 1rem;
+  }
+
+  /* Register card on mobile */
+  .auth-card.register-card {
+    padding: 1.4rem 1.2rem;
+  }
+
+  .register-card h1 {
+    font-size: 1.3rem !important;
+  }
+
+  .form-row {
+    flex-direction: row;       /* ← keep first+last name side by side */
+    gap: 0.5rem;
+  }
+
+  .form-row .form-group input {
+    padding: 0.6rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  /* Theme toggle smaller on mobile */
+  .auth-theme-toggle {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -440,23 +468,37 @@
 @media (max-width: 480px) {
 
   .auth-container {
-    padding: 32px 0.8rem;
+    padding: 20px 0.8rem;
+    align-items: flex-start;   /* allow scroll on tiny screens */
   }
 
   .auth-card {
-    max-width: 300px;
-    padding: 1.2rem 1rem;
+    max-width: 100%;
+    padding: 1.3rem 1rem;
+    border-radius: 16px;
   }
 
   .auth-card h1 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+  }
+
+  /* Stack first+last name vertically on tiny screens */
+  .form-row {
+    flex-direction: column;
+    gap: 0.65rem;
   }
 
   .form-group input {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    padding: 0.65rem 0.8rem;
   }
 
   .btn-submit {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+    padding: 0.7rem;
+  }
+
+  .auth-card p {
+    font-size: 0.72rem;
   }
 }

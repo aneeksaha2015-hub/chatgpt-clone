@@ -976,117 +976,213 @@
 @media (max-width: 768px) {
 
   .mobile-only {
-  display: flex !important;
-}
-
-.desktop-only {
-  display: none !important;
-}
-
-  /* 🔥 FIX: keep sidebar LEFT, not top */
-  .home-container {
-    flex-direction: row;
+    display: flex !important;
   }
 
-  /* 🔥 FIX: sidebar becomes LEFT drawer */
+  .desktop-only {
+    display: none !important;
+  }
+
+  .home-container {
+    flex-direction: row;
+    position: relative;
+  }
+
+  /* Sidebar = full screen fixed drawer */
   .sidebar {
-  position: relative;   /* ❗ not fixed */
-  left: 0;              /* ❗ remove hidden behavior */
-
-  width: 260px;
-  min-width: 260px;
-  height: 100dvh;
-
-  flex-direction: column;
-  align-items: flex-start;
-
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: none;
-
-  transition: width 0.3s ease;
-}
-
-  /* 🔥 open state */
-  .sidebar.open {
+    position: fixed !important;
+    top: 0;
     left: 0;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 999;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow-y: auto;
+    padding: var(--spacing-lg) var(--spacing-md) !important;
+    gap: var(--spacing-md);
+    flex-direction: column;
+    align-items: flex-start !important;
+    border-right: none !important;
+    border-bottom: none !important;
+  }
+
+  /* Open = slide in from left */
+  .sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+
+  /* Collapsed = hidden off screen */
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 100vw !important;
+    min-width: 100vw !important;
+    overflow: visible !important;
+    padding: var(--spacing-lg) var(--spacing-md) !important;
   }
 
   [data-theme="light"] .sidebar {
-    border-right: 1px solid rgba(99, 102, 241, 0.1);
+    border-right: none !important;
+    background: rgba(255, 255, 255, 0.98) !important;
   }
 
-  /* 🔥 FIX: don't break layout */
-  /* 🔥 collapse = hide */
-.sidebar.collapsed {
-  width: 0;
-  min-width: 0;
-  overflow: hidden;
-  padding: 0;
-}
-
+  /* Sidebar header */
   .sidebar-header {
-    padding: 0;
+    width: 100%;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 var(--spacing-md) 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: var(--spacing-sm);
     flex-shrink: 0;
   }
 
+  [data-theme="light"] .sidebar-header {
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+  }
+
+  /* Show title */
   .sidebar-title {
-    display: none;
+    display: block !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
   }
 
+  [data-theme="light"] .sidebar-title {
+    color: var(--text-primary) !important;
+  }
+
+  /* Toggle button = close button inside drawer */
+  .btn-sidebar-toggle.mobile-only {
+    display: flex !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 0 !important;
+    position: relative;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .btn-sidebar-toggle.mobile-only::after {
+    content: '×';
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1;
+    position: absolute;
+  }
+
+  [data-theme="light"] .btn-sidebar-toggle.mobile-only {
+    background: rgba(99, 102, 241, 0.06) !important;
+    border-color: rgba(99, 102, 241, 0.15) !important;
+  }
+
+  [data-theme="light"] .btn-sidebar-toggle.mobile-only::after {
+    color: var(--text-secondary);
+  }
+
+  /* New chat full width */
   .btn-new-chat {
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    width: 100% !important;
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    border-radius: var(--radius-xl) !important;
   }
 
-  /* 🔥 FIX: show chats again */
+  .btn-label {
+    display: inline !important;
+  }
+
+  /* Show search */
+  .search-wrapper {
+    display: flex !important;
+    width: 100%;
+  }
+
+  /* Show chats list */
   .chats-list {
-    display: block;
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: auto;
+    flex: 1;
   }
 
   .sidebar.collapsed .chats-list {
-    display: block;
+    display: flex !important;
   }
 
+  /* Chat items full width — no clipping */
+  .chat-item {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  /* ✅ Always show pin/rename/delete buttons on mobile */
+  .chat-item-actions {
+    opacity: 1 !important;
+    display: flex !important;
+    gap: 6px;
+  }
+
+  /* Make action buttons bigger and easier to tap */
+  .btn-chat-action {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: var(--radius-md) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .btn-chat-action:hover,
+  .btn-chat-action:active {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: white !important;
+  }
+
+  .btn-chat-action.delete {
+    background: rgba(239, 68, 68, 0.08) !important;
+    border-color: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+  }
+
+  .btn-chat-action.delete:hover,
+  .btn-chat-action.delete:active {
+    background: rgba(239, 68, 68, 0.18) !important;
+  }
+
+  [data-theme="light"] .btn-chat-action {
+    background: rgba(99, 102, 241, 0.06) !important;
+    border-color: rgba(99, 102, 241, 0.12) !important;
+    color: var(--text-secondary) !important;
+  }
+
+  /* Chat item title shorter to make room for buttons */
+  .chat-item-info {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .chat-item-title {
+    font-size: 0.85rem !important;
+  }
+
+  /* Main content full width */
   .main-content {
     flex: 1;
-    height: 100%;
-    min-height: 100%;
-  }
-
-  .welcome-screen {
-    overflow-y: auto;
-    justify-content: flex-start;
-    padding: var(--spacing-lg) var(--spacing-md);
-    gap: var(--spacing-lg);
-  }
-
-  .welcome-title {
-    font-size: 1.8rem;
-  }
-
-  .welcome-title-brand {
-    font-size: 2.2rem;
-  }
-
-  .welcome-subtitle {
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-
-  .welcome-logo {
-    width: 64px;
-    height: 64px;
-    font-size: 1.8rem;
-  }
-
-  .suggestion-grid {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 100%;
-    gap: var(--spacing-xs);
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
   .chat-header {
     padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
   }
 
   .chat-input {
@@ -1096,32 +1192,56 @@
   .message-bubble {
     max-width: 90%;
   }
-}
 
-/* overlay (needed for drawer UX) */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 900;
-}
-
-@media (max-width: 480px) {
-  .welcome-title {
-    font-size: 1.5rem;
+  .welcome-screen {
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: var(--spacing-lg) var(--spacing-md);
+    gap: var(--spacing-lg);
   }
 
-  .welcome-title-brand {
-    font-size: 1.8rem;
-  }
+  .welcome-title { font-size: 1.8rem; }
+  .welcome-title-brand { font-size: 2.2rem; }
+  .welcome-subtitle { font-size: 0.9rem; line-height: 1.6; }
+  .welcome-logo { width: 64px; height: 64px; font-size: 1.8rem; }
 
   .suggestion-grid {
     grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
+    gap: var(--spacing-xs);
   }
 
   .suggestion-card {
     padding: var(--spacing-sm);
   }
+}
+
+/* Dark overlay behind open drawer using :has() — no JS needed */
+@media (max-width: 768px) {
+  .home-container:has(.sidebar:not(.collapsed))::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 998;
+    backdrop-filter: blur(2px);
+    pointer-events: auto;
+  }
+}
+
+/* overlay class */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 900;
+}
+
+@media (max-width: 480px) {
+  .welcome-title { font-size: 1.5rem; }
+  .welcome-title-brand { font-size: 1.8rem; }
+  .suggestion-grid { grid-template-columns: repeat(2, 1fr); }
+  .suggestion-card { padding: var(--spacing-sm); }
 }
 
 /* ===== HEADER ACTIONS ===== */
