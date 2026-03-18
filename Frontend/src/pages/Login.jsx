@@ -5,7 +5,7 @@ import '../styles/auth.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-export default function Login() {
+export default function Login({ setUser }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -50,10 +50,11 @@ export default function Login() {
     }, {
       withCredentials: true
     }).then((res) => {
-      console.log(res);
+      setUser(res.data.user);
       navigate("/");
     }).catch((err) => {
       console.log(err);
+      setErrors({ submit: "Invalid email or password" });
     }).finally(() => {
       setLoading(false);
     });
@@ -62,7 +63,6 @@ export default function Login() {
   return (
     <div className="auth-container">
 
-      {/* Theme Toggle */}
       <button
         className="auth-theme-toggle"
         onClick={toggleTheme}
@@ -88,8 +88,6 @@ export default function Login() {
       </button>
 
       <div className="auth-card">
-
-        {/* Logo */}
         <div className="auth-card-logo">
           <div className="auth-logo-icon">✨</div>
         </div>

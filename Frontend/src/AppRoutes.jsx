@@ -1,9 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import React, { lazy, Suspense } from 'react'
+import React, { lazy, Suspense, useEffect, useState } from 'react'
+import axios from 'axios'
 
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
+
+const BASE_URL = 'http://localhost:3000'
 
 const LoadingFallback = () => (
   <div style={{
@@ -13,21 +16,60 @@ const LoadingFallback = () => (
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: '0.9rem',
-    letterSpacing: '0.1em',
-  }}>
-  </div>
+  }} />
 )
 
+const ProtectedRoute = ({ user, loading, children }) => {
+  if (loading) return <LoadingFallback />
+  if (!user) return <Navigate to='/login' replace />
+  return children
+}
+
+const GuestRoute = ({ user, loading, children }) => {
+  if (loading) return <LoadingFallback />
+  if (user) return <Navigate to='/' replace />
+  return children
+}
+
 const AppRoutes = () => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/auth/me`, { withCredentials: true })
+      .then((res) => setUser(res.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false))
+  }, [])
+
   return (
     <BrowserRouter>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/register' element={<Register />} />
+          <Route
+            path='/'
+            element={
+              <ProtectedRoute user={user} loading={loading}>
+                <Home user={user} setUser={setUser} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/login'
+            element={
+              <GuestRoute user={user} loading={loading}>
+                <Login setUser={setUser} />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path='/register'
+            element={
+              <GuestRoute user={user} loading={loading}>
+                <Register setUser={setUser} />
+              </GuestRoute>
+            }
+          />
           <Route path='*' element={<Navigate to='/' replace />} />
         </Routes>
       </Suspense>

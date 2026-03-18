@@ -5,7 +5,7 @@ import "../styles/auth.css";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
-export default function Register() {
+export default function Register({ setUser }) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -16,7 +16,7 @@ export default function Register() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate(); // ✅ no argument
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -75,19 +75,18 @@ export default function Register() {
     }, {
       withCredentials: true
     }).then((res) => {
-      console.log(res);
+      setUser(res.data.user);
       navigate('/');
     }).catch((err) => {
       console.log(err);
       setErrors({ submit: "Registration failed. Please try again." });
     }).finally(() => {
-      setLoading(false); 
+      setLoading(false);
     });
   };
 
   return (
     <div className="auth-container">
-      {/* Theme Toggle */}
       <button
         className="auth-theme-toggle"
         onClick={toggleTheme}
@@ -113,7 +112,6 @@ export default function Register() {
       </button>
 
       <div className="auth-card">
-        {/* Logo */}
         <div className="auth-card-logo">
           <div className="auth-logo-icon">✨</div>
         </div>

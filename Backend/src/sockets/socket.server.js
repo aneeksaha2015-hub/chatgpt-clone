@@ -17,8 +17,6 @@ function initSocketServer(httpServer) {
   io.use(async (socket, next) => {
     const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
 
-    console.log("Socket connection cookies:", cookies);
-
     if (!cookies.token) {
       return next(new Error("Authentication error: No token provided"));
     }
@@ -97,7 +95,31 @@ function initSocketServer(httpServer) {
             ]
           : [];
 
-      const response = await aiService.generateResponse([...ltm, ...stm]);
+      // System prompt to prevent markdown formatting
+      const systemPrompt = [
+        {
+          role: "user",
+          parts: [
+            {
+              text: "You are a helpful AI assistant. Always respond in plain, natural language. Never use markdown formatting such as **bold**, *italic*, # headers, bullet points with dashes or asterisks, or any other markdown syntax. Write in clear, readable prose as if having a natural conversation.",
+            },
+          ],
+        },
+        {
+          role: "model",
+          parts: [
+            {
+              text: "Understood. I will always respond in plain natural language without any markdown formatting.",
+            },
+          ],
+        },
+      ];
+
+      const response = await aiService.generateResponse([
+        ...systemPrompt,
+        ...ltm,
+        ...stm,
+      ]);
 
       const responseMessage = await messageModel.create({
         chat: messagePayload.chat,

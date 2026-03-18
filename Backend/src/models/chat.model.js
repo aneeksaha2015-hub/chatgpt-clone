@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const chatSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
@@ -11,16 +10,18 @@ const chatSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    lastActivity : {
+    lastActivity: {
         type: Date,
         default: Date.now
+    },
+    pinned: {
+        type: Boolean,
+        default: false
     }
-},{
-    timestamps : true
+}, {
+    timestamps: true
 })
 
-
-const chatModel = mongoose.model("chat",chatSchema)
-
+const chatModel = mongoose.model("chat", chatSchema)
 
 module.exports = chatModel

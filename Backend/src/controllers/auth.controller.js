@@ -1,80 +1,99 @@
-const userModel = require ('../models/user.model')
+const userModel = require('../models/user.model')
 const bcrypt = require('bcryptjs')
-const jwt = require ('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
-async function registerUser(req,res) {
-    const { fullName: { firstName, lastName }, email, password} = req.body
-    
-    const isUser = await userModel.findOne({
-        email
-    })
-
-    if(isUser) {
-        return  res.status(409).json({
-            message: "User already exists!"
-        })
+async function registerUser(req, res) {
+    const { fullName: { firstName, lastName }, email, password } = req.body
+    const isUser = await userModel.findOne({ email })
+    if (isUser) {
+        return res.status(409).json({ message: "User already exists!" })
     }
-
-    const hashPassword = await bcrypt.hash(password,10);
-
+    const hashPassword = await bcrypt.hash(password, 10)
     const user = await userModel.create({
-        fullName : {
-            firstName,lastName
-        },
+        fullName: { firstName, lastName },
         email,
         password: hashPassword
     })
-
-    const token =  jwt.sign({id:user._id},process.env.JWT_SECRET)
-
-    res.cookie("token",token)
-
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
+    res.cookie("token", token, { httpOnly: true, sameSite: 'lax' })
     return res.status(201).json({
         message: "User successfully registered!",
-        user: {
-            email: user.email,
-            _id: user._id,
-            fullName:user.fullName
-        }
+        user: { email: user.email, _id: user._id, fullName: user.fullName }
     })
 }
 
-async function loginUser(req,res) {
-    const { email, password} = req.body;
-
-    const user = await userModel.findOne({
-        email
-    })
-
-    if(!user) {
-        return res.status(400).json({
-            message: "Invalid email or password!" });
+async function loginUser(req, res) {
+    const { email, password } = req.body
+    const user = await userModel.findOne({ email })
+    if (!user) {
+        return res.status(400).json({ message: "Invalid email or password!" })
     }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if(!isPasswordValid) {
-        return res.status(400).json({
-            message: "Invalid email or password"
-        })
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+    if (!isPasswordValid) {
+        return res.status(400).json({ message: "Invalid email or password" })
     }
-
-    const token = jwt.sign({id:user._id},process.env.JWT_SECRET);
-
-    res.cookie("token",token);
-
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET)
+    res.cookie("token", token, { httpOnly: true, sameSite: 'lax' })
     return res.status(200).json({
         message: "User logged in successfully!",
-        user: {
-            email: user.email,
-            _id:user._id,
-            fullName: user.fullName
-        }
+        user: { email: user.email, _id: user._id, fullName: user.fullName }
     })
+}
 
+async function logoutUser(req, res) {
+    res.clearCookie("token")
+    return res.status(200).json({ message: "Logged out successfully!" })
+}
+
+async function getMe(req, res) {
+    const user = req.user
+    return res.status(200).json({
+        user: { email: user.email, _id: user._id, fullName: user.fullName }
+    })
+}
+
+async function updateSettings(req, res) {
+    const { firstName, lastName, email, currentPassword, newPassword } = req.body
+    const user = await userModel.findById(req.user._id)
+
+    if (!user) {
+        return res.status(404).json({ message: "User not found!" })
+    }
+
+    // Update name
+    if (firstName) user.fullName.firstName = firstName
+    if (lastName) user.fullName.lastName = lastName
+
+    // Update email
+    if (email && email !== user.email) {
+        const emailExists = await userModel.findOne({ email })
+        if (emailExists) {
+            return res.status(409).json({ message: "Email already in use!" })
+        }
+        user.email = email
+    }
+
+    // Update password
+    if (currentPassword && newPassword) {
+        const isValid = await bcrypt.compare(currentPassword, user.password)
+        if (!isValid) {
+            return res.status(400).json({ message: "Current password is incorrect!" })
+        }
+        user.password = await bcrypt.hash(newPassword, 10)
+    }
+
+    await user.save()
+
+    return res.status(200).json({
+        message: "Settings updated successfully!",
+        user: { email: user.email, _id: user._id, fullName: user.fullName }
+    })
 }
 
 module.exports = {
     registerUser,
     loginUser,
+    logoutUser,
+    getMe,
+    updateSettings
 }
