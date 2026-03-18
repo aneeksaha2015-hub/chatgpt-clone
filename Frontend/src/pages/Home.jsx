@@ -31,9 +31,7 @@ export default function Home({ user, setUser }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [activeChatId, setActiveChatId] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(
-    window.innerWidth <= 768,
-  );
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [overlayClass, setOverlayClass] = useState("");
   const [isAiTyping, setIsAiTyping] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
