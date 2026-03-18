@@ -65,7 +65,7 @@ export default function Register({ setUser }) {
     if (!validateForm()) return;
     setLoading(true);
 
-    axios.post("http://localhost:3000/api/auth/register", {
+    axios.post("https://chatgpt-pro.onrender.com/api/auth/register", {
       email: formData.email,
       fullName: {
         firstName: formData.firstName,

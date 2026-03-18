@@ -44,7 +44,7 @@ export default function Login({ setUser }) {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-    axios.post("http://localhost:3000/api/auth/login", {
+    axios.post("https://chatgpt-pro.onrender.com/api/auth/login", {
       email: formData.email,
       password: formData.password
     }, {

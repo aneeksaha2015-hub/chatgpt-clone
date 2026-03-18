@@ -6,7 +6,7 @@ const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 
-const BASE_URL = 'http://localhost:3000'
+const BASE_URL = 'https://chatgpt-pro.onrender.com'
 
 const LoadingFallback = () => (
   <div style={{

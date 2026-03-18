@@ -24,7 +24,7 @@ const SUGGESTIONS = [
   { icon: "🐛", text: "Debug my code", desc: "Find and fix issues fast" },
 ];
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://chatgpt-pro.onrender.com";
 
 export default function Home({ user, setUser }) {
   const [chats, setChats] = useState([]);
