@@ -313,9 +313,8 @@
   height: 100%;
   position: relative;
   z-index: 1;
-  padding: var(--spacing-lg);
-  padding-left: var(--spacing-md);
-  gap: var(--spacing-md);
+  padding: 0;
+  gap: 0;
 }
 
 /* Chat Header */
@@ -323,7 +322,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   flex-shrink: 0;
 }
 
@@ -424,19 +423,19 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: var(--spacing-lg);
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  border-radius: var(--radius-2xl);
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
 }
 
 [data-theme="light"] .chat-messages {
-  background: rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(99, 102, 241, 0.08);
+  background: transparent;
+  border: none;
 }
 
 /* Welcome Screen */
@@ -489,33 +488,87 @@
   50%       { transform: translateY(-8px); }
 }
 
+/* ===== WELCOME TITLE — bigger, bolder, animated multi-colour gradient ===== */
+.welcome-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
 .welcome-title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #818cf8 100%);
+  font-size: 3.2rem;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  color: rgba(255, 255, 255, 0.92);
+  /* plain white for "Welcome to" part */
+}
+
+/* The "ChatGPT Pro" brand span gets the flashy gradient */
+.welcome-title-brand {
+  display: inline-block;
+  font-size: 3.6rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  background: linear-gradient(
+    135deg,
+    #ffffff  0%,
+    #a78bfa 20%,
+    #60a5fa 40%,
+    #f472b6 60%,
+    #34d399 80%,
+    #fbbf24 100%
+  );
+  background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: -0.5px;
+  animation: titleGradientShift 5s ease infinite;
+  filter: drop-shadow(0 0 24px rgba(167, 139, 250, 0.5));
+}
+
+@keyframes titleGradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 [data-theme="light"] .welcome-title {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color), #8b5cf6);
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: #1e1b4b;
 }
 
+[data-theme="light"] .welcome-title-brand {
+  background: linear-gradient(
+    135deg,
+    #4f46e5 0%,
+    #7c3aed 25%,
+    #db2777 55%,
+    #0891b2 80%,
+    #059669 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: titleGradientShift 5s ease infinite;
+  filter: drop-shadow(0 0 16px rgba(99, 102, 241, 0.3));
+}
+
+/* ===== WELCOME SUBTITLE — bigger and more readable ===== */
 .welcome-subtitle {
-  font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.5);
-  max-width: 380px;
-  line-height: 1.7;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 460px;
+  line-height: 1.85;
+  letter-spacing: 0.2px;
+  font-weight: 400;
 }
 
 [data-theme="light"] .welcome-subtitle {
   color: var(--text-secondary);
 }
 
+/* Suggestion Grid */
 .suggestion-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -594,6 +647,7 @@
 /* Chat Input */
 .chat-input {
   flex-shrink: 0;
+  padding: 0 var(--spacing-lg) var(--spacing-lg);
 }
 
 .chat-input-wrapper {
@@ -726,6 +780,12 @@
     grid-template-columns: 1fr;
     max-width: 300px;
   }
+  .welcome-title {
+    font-size: 2.2rem;
+  }
+  .welcome-title-brand {
+    font-size: 2.6rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -736,6 +796,12 @@
   .main-content {
     padding: var(--spacing-sm);
     padding-left: var(--spacing-xs);
+  }
+  .welcome-title {
+    font-size: 1.8rem;
+  }
+  .welcome-title-brand {
+    font-size: 2rem;
   }
 }
 
@@ -764,4 +830,3 @@
   70%  { opacity: 1; }
   100% { opacity: 0; }
 }
-

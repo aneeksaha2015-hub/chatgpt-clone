@@ -36,7 +36,6 @@ export default function Login() {
     setLoading(true);
     try {
       console.log('Login:', formData);
-      // TODO: Implement login API call
       setLoading(false);
     } catch (error) {
       console.error('Login error:', error);
@@ -74,7 +73,15 @@ export default function Login() {
       </button>
 
       <div className="auth-card">
+
+        {/* Logo */}
+        <div className="auth-card-logo">
+          <div className="auth-logo-icon">✨</div>
+        </div>
+
         <h1>Welcome Back</h1>
+        <p className="auth-card-subtitle">Sign in to continue to ChatGPT Pro</p>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email">Email Address</label>

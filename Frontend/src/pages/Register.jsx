@@ -50,7 +50,6 @@ export default function Register() {
     try {
       const { confirmPassword, ...dataToSend } = formData;
       console.log('Register:', dataToSend);
-      // TODO: Implement register API call
       setLoading(false);
     } catch (error) {
       console.error('Register error:', error);
@@ -88,7 +87,15 @@ export default function Register() {
       </button>
 
       <div className="auth-card">
+
+        {/* Logo */}
+        <div className="auth-card-logo">
+          <div className="auth-logo-icon">✨</div>
+        </div>
+
         <h1>Create Account</h1>
+        <p className="auth-card-subtitle">Join ChatGPT Pro and start creating</p>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-row">
             <div className="form-group">

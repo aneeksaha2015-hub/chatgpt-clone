@@ -20,19 +20,10 @@ export default function Home() {
   useEffect(() => {}, []);
 
   const handleThemeToggle = () => {
-    // Step 1 — show overlay with destination theme colour
     const goingTo = theme === 'dark' ? 'light' : 'dark';
     setOverlayClass(`sweeping-to-${goingTo}`);
-
-    // Step 2 — switch theme at peak opacity (halfway through)
-    setTimeout(() => {
-      toggleTheme();
-    }, 150);
-
-    // Step 3 — remove overlay after animation finishes
-    setTimeout(() => {
-      setOverlayClass('');
-    }, 400);
+    setTimeout(() => { toggleTheme(); }, 150);
+    setTimeout(() => { setOverlayClass(''); }, 400);
   };
 
   const handleNewChat = () => console.log('Creating new chat...');
@@ -50,7 +41,6 @@ export default function Home() {
   return (
     <div className="home-container">
 
-      {/* Full page theme transition overlay */}
       {overlayClass && <div className={`theme-overlay ${overlayClass}`} />}
 
       {/* Sidebar */}
@@ -135,7 +125,13 @@ export default function Home() {
         <div className="chat-messages">
           <div className="welcome-screen">
             <div className="welcome-logo">🤖</div>
-            <h2 className="welcome-title">Welcome to ChatGPT Pro</h2>
+
+            <div className="welcome-title-wrapper">
+              <h2 className="welcome-title">
+                Welcome to <span className="welcome-title-brand">ChatGPT Pro</span>
+              </h2>
+            </div>
+
             <p className="welcome-subtitle">
               Your AI-powered assistant. Ask me anything — I'm here to help you think, create, and solve problems.
             </p>
