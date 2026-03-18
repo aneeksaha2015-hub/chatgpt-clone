@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../hooks/useTheme';
 import '../styles/theme.css';
 import '../styles/auth.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFormData({ email: '', password: '' });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -26,22 +36,27 @@ export default function Login() {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { email, password } = e.target.form;
+    setFormData({ email: email.value, password: password.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-    try {
-      console.log('Login:', formData);
+    axios.post("http://localhost:3000/api/auth/login", {
+      email: formData.email,
+      password: formData.password
+    }, {
+      withCredentials: true
+    }).then((res) => {
+      console.log(res);
+      navigate("/");
+    }).catch((err) => {
+      console.log(err);
+    }).finally(() => {
       setLoading(false);
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrors({ submit: 'Login failed. Please try again.' });
-      setLoading(false);
-    }
+    });
   };
 
   return (
@@ -82,7 +97,7 @@ export default function Login() {
         <h1>Welcome Back</h1>
         <p className="auth-card-subtitle">Sign in to continue to ChatGPT Pro</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <input
@@ -93,6 +108,7 @@ export default function Login() {
               onChange={handleChange}
               placeholder="you@example.com"
               required
+              autoComplete="off"
               className={errors.email ? 'input-error' : ''}
             />
             {errors.email && <span className="form-error">{errors.email}</span>}
@@ -108,6 +124,7 @@ export default function Login() {
               onChange={handleChange}
               placeholder="••••••••"
               required
+              autoComplete="new-password"
               className={errors.password ? 'input-error' : ''}
             />
             {errors.password && <span className="form-error">{errors.password}</span>}

@@ -1,38 +1,55 @@
-import React, { useState } from 'react';
-import { useTheme } from '../hooks/useTheme';
-import '../styles/theme.css';
-import '../styles/auth.css';
+import React, { useState, useEffect } from "react";
+import { useTheme } from "../hooks/useTheme";
+import "../styles/theme.css";
+import "../styles/auth.css";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate(); // ✅ no argument
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.firstName.trim())
+      newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email";
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -47,27 +64,36 @@ export default function Register() {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-    try {
-      const { confirmPassword, ...dataToSend } = formData;
-      console.log('Register:', dataToSend);
-      setLoading(false);
-    } catch (error) {
-      console.error('Register error:', error);
-      setErrors({ submit: 'Registration failed. Please try again.' });
-      setLoading(false);
-    }
+
+    axios.post("http://localhost:3000/api/auth/register", {
+      email: formData.email,
+      fullName: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      },
+      password: formData.password,
+    }, {
+      withCredentials: true
+    }).then((res) => {
+      console.log(res);
+      navigate('/');
+    }).catch((err) => {
+      console.log(err);
+      setErrors({ submit: "Registration failed. Please try again." });
+    }).finally(() => {
+      setLoading(false); // ✅ always runs
+    });
   };
 
   return (
     <div className="auth-container">
-
       {/* Theme Toggle */}
       <button
         className="auth-theme-toggle"
         onClick={toggleTheme}
-        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
       >
-        {theme === 'dark' ? (
+        {theme === "dark" ? (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18">
             <circle cx="12" cy="12" r="5" strokeWidth="2" />
             <line x1="12" y1="1" x2="12" y2="3" strokeWidth="2" strokeLinecap="round" />
@@ -87,7 +113,6 @@ export default function Register() {
       </button>
 
       <div className="auth-card">
-
         {/* Logo */}
         <div className="auth-card-logo">
           <div className="auth-logo-icon">✨</div>
@@ -96,7 +121,7 @@ export default function Register() {
         <h1>Create Account</h1>
         <p className="auth-card-subtitle">Join ChatGPT Pro and start creating</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="firstName">First Name</label>
@@ -108,7 +133,8 @@ export default function Register() {
                 onChange={handleChange}
                 placeholder="John"
                 required
-                className={errors.firstName ? 'input-error' : ''}
+                autoComplete="off"
+                className={errors.firstName ? "input-error" : ""}
               />
               {errors.firstName && <span className="form-error">{errors.firstName}</span>}
             </div>
@@ -123,7 +149,8 @@ export default function Register() {
                 onChange={handleChange}
                 placeholder="Doe"
                 required
-                className={errors.lastName ? 'input-error' : ''}
+                autoComplete="off"
+                className={errors.lastName ? "input-error" : ""}
               />
               {errors.lastName && <span className="form-error">{errors.lastName}</span>}
             </div>
@@ -139,7 +166,8 @@ export default function Register() {
               onChange={handleChange}
               placeholder="you@example.com"
               required
-              className={errors.email ? 'input-error' : ''}
+              autoComplete="off"
+              className={errors.email ? "input-error" : ""}
             />
             {errors.email && <span className="form-error">{errors.email}</span>}
           </div>
@@ -154,7 +182,8 @@ export default function Register() {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className={errors.password ? 'input-error' : ''}
+              autoComplete="new-password"
+              className={errors.password ? "input-error" : ""}
             />
             {errors.password && <span className="form-error">{errors.password}</span>}
           </div>
@@ -169,7 +198,8 @@ export default function Register() {
               onChange={handleChange}
               placeholder="••••••••"
               required
-              className={errors.confirmPassword ? 'input-error' : ''}
+              autoComplete="new-password"
+              className={errors.confirmPassword ? "input-error" : ""}
             />
             {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
           </div>
@@ -177,7 +207,7 @@ export default function Register() {
           {errors.submit && <span className="form-error">{errors.submit}</span>}
 
           <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

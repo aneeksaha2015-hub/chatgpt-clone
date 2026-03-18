@@ -2,15 +2,13 @@ export const ThemeManager = {
   getTheme: () => {
     const saved = localStorage.getItem('theme');
     if (saved) {
-      console.log('[Theme] Retrieved from localStorage:', saved);
       return saved;
     }
 
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      console.log('[Theme] System preference detected: dark');
       return 'dark';
     }
-    console.log('[Theme] Defaulting to: light');
+
     return 'light';
   },
 
@@ -22,7 +20,7 @@ export const ThemeManager = {
       root.setAttribute('data-theme', 'dark');
       console.log('[Theme] Set to DARK mode');
     } else {
-      root.setAttribute('data-theme', 'light'); // ✅ explicitly set light
+      root.setAttribute('data-theme', 'light');
       console.log('[Theme] Set to LIGHT mode');
     }
   },
