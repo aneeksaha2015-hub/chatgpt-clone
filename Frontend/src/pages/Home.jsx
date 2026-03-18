@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import axios from 'axios';
 import '../styles/home.css';
 
 const SUGGESTIONS = [
@@ -9,15 +12,53 @@ const SUGGESTIONS = [
   { icon: '🐛', text: 'Debug my code', desc: 'Find and fix issues fast' },
 ];
 
+const BASE_URL = 'http://localhost:3000';
+
 export default function Home() {
   const [chats, setChats] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
   const [activeChatId, setActiveChatId] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [overlayClass, setOverlayClass] = useState('');
+  const [isAiTyping, setIsAiTyping] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const socketRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    socketRef.current = io(BASE_URL, { withCredentials: true });
+
+    socketRef.current.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+      if (err.message.includes('Authentication')) navigate('/login');
+    });
+
+    socketRef.current.on('ai-response', ({ content }) => {
+      setIsAiTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'model', content, _id: Date.now() },
+      ]);
+    });
+
+    return () => socketRef.current?.disconnect();
+  }, []);
+
+  useEffect(() => {
+    axios.get(`${BASE_URL}/api/chat`, { withCredentials: true })
+      .then((res) => setChats(res.data.chats || []))
+      .catch((err) => {
+        if (err.response?.status === 401) navigate('/login');
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!messagesContainerRef.current) return;
+    messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+  }, [messages]);
 
   const handleThemeToggle = () => {
     const goingTo = theme === 'dark' ? 'light' : 'dark';
@@ -26,17 +67,95 @@ export default function Home() {
     setTimeout(() => { setOverlayClass(''); }, 400);
   };
 
-  const handleNewChat = () => console.log('Creating new chat...');
-  const handleSelectChat = (chatId) => setActiveChatId(chatId);
+  const handleNewChat = async () => {
+    try {
+      const res = await axios.post(
+        `${BASE_URL}/api/chat`,
+        { title: 'New Chat' },
+        { withCredentials: true }
+      );
+      const newChat = res.data.chat;
+      setChats((prev) => [newChat, ...prev]);
+      setActiveChatId(newChat._id);
+      setMessages([]);
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/login');
+      console.error('Failed to create chat:', err);
+    }
+  };
 
-  const handleSubmit = (e) => {
+  const handleSelectChat = async (chatId) => {
+    if (chatId === activeChatId) return;
+    setActiveChatId(chatId);
+    setChatLoading(true);
+    try {
+      const res = await axios.get(
+        `${BASE_URL}/api/chat/${chatId}/messages`,
+        { withCredentials: true }
+      );
+      setMessages(res.data.messages || []);
+    } catch (err) {
+      console.error('Failed to fetch messages:', err);
+      setMessages([]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
+  const handleDeleteChat = async (e, chatId) => {
+    e.stopPropagation();
+    try {
+      await axios.delete(
+        `${BASE_URL}/api/chat/${chatId}`,
+        { withCredentials: true }
+      );
+      setChats((prev) => prev.filter((c) => c._id !== chatId));
+      if (activeChatId === chatId) {
+        setActiveChatId(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      console.error('Failed to delete chat:', err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    console.log('Sending:', message);
+
+    let chatId = activeChatId;
+
+    if (!chatId) {
+      try {
+        const res = await axios.post(
+          `${BASE_URL}/api/chat`,
+          { title: message.slice(0, 40) },
+          { withCredentials: true }
+        );
+        const newChat = res.data.chat;
+        setChats((prev) => [newChat, ...prev]);
+        setActiveChatId(newChat._id);
+        chatId = newChat._id;
+      } catch (err) {
+        if (err.response?.status === 401) navigate('/login');
+        console.error('Failed to create chat:', err);
+        return;
+      }
+    }
+
+    const userMessage = { role: 'user', content: message, _id: Date.now() };
+    setMessages((prev) => [...prev, userMessage]);
     setMessage('');
+    setIsAiTyping(true);
+
+    socketRef.current.emit('ai-message', {
+      chat: chatId,
+      content: message,
+    });
   };
 
   const handleSuggestion = (text) => setMessage(text);
+  const showWelcome = messages.length === 0 && !chatLoading;
 
   return (
     <div className="home-container">
@@ -70,14 +189,36 @@ export default function Home() {
               </div>
             ) : (
               <>
-                <span className="chats-section-label">Recent</span>
+                <div className="chats-section-header">
+                  <span className="chats-section-label">Recent</span>
+                  <span className="chats-section-count">{chats.length}</span>
+                </div>
                 {chats.map((chat) => (
                   <div
-                    key={chat.id}
-                    className={`chat-item ${activeChatId === chat.id ? 'active' : ''}`}
-                    onClick={() => handleSelectChat(chat.id)}
+                    key={chat._id}
+                    className={`chat-item ${activeChatId === chat._id ? 'active' : ''}`}
+                    onClick={() => handleSelectChat(chat._id)}
                   >
-                    <p>{chat.title}</p>
+                    <div className="chat-item-icon">💬</div>
+                    <div className="chat-item-info">
+                      <p className="chat-item-title">{chat.title}</p>
+                      <span className="chat-item-date">
+                        {new Date(chat.lastActivity).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <button
+                      className="btn-delete-chat"
+                      onClick={(e) => handleDeleteChat(e, chat._id)}
+                      title="Delete chat"
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14">
+                        <polyline points="3 6 5 6 21 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M19 6l-1 14H6L5 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M10 11v6" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M14 11v6" strokeWidth="2" strokeLinecap="round" />
+                        <path d="M9 6V4h6v2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                   </div>
                 ))}
               </>
@@ -121,17 +262,17 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Messages */}
-        <div className="chat-messages">
+        {/* Messages or Welcome Screen */}
+        {chatLoading ? (
+          <div className="chat-messages" />
+        ) : showWelcome ? (
           <div className="welcome-screen">
             <div className="welcome-logo">🤖</div>
-
             <div className="welcome-title-wrapper">
               <h2 className="welcome-title">
                 Welcome to <span className="welcome-title-brand">ChatGPT Pro</span>
               </h2>
             </div>
-
             <p className="welcome-subtitle">
               Your AI-powered assistant. Ask me anything — I'm here to help you think, create, and solve problems.
             </p>
@@ -149,7 +290,22 @@ export default function Home() {
               ))}
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="chat-messages" ref={messagesContainerRef}>
+            {messages.map((msg) => (
+              <div key={msg._id} className={`message-bubble ${msg.role}`}>
+                <div className="message-content">{msg.content}</div>
+              </div>
+            ))}
+            {isAiTyping && (
+              <div className="message-bubble model">
+                <div className="message-content typing-indicator">
+                  <span /><span /><span />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Input */}
         <div className="chat-input">
@@ -161,7 +317,7 @@ export default function Home() {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
             />
-            <button className="btn-send" onClick={handleSubmit} disabled={!message.trim()}>
+            <button className="btn-send" onClick={handleSubmit} disabled={!message.trim() || isAiTyping}>
               ➤
             </button>
           </div>

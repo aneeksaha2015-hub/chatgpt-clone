@@ -1,9 +1,12 @@
 const express = require('express')
-const authMiddlewar = require('../middlewares/auth.middleware')
+const authMiddleware = require('../middlewares/auth.middleware')
 const chatController = require('../controllers/chat.controller')
 
 const router = express.Router();
 
-router.post('/', authMiddlewar.authUser, chatController.createChat)
+router.post('/', authMiddleware.authUser, chatController.createChat)
+router.get('/', authMiddleware.authUser, chatController.getChats)
+router.get('/:chatId/messages', authMiddleware.authUser, chatController.getChatMessages)
+router.delete('/:chatId', authMiddleware.authUser, chatController.deleteChat)
 
 module.exports = router;

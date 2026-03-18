@@ -2,6 +2,8 @@
 
 html {
   scroll-behavior: smooth;
+  overflow: hidden;
+  scrollbar-gutter: auto;
 }
 
 body {
@@ -166,9 +168,4 @@ button, a, input, textarea, select {
   .container {
     padding: 0 var(--spacing-xl);
   }
-}
-
-/* Prevent layout shift from scrollbar */
-html {
-  scrollbar-gutter: stable;
 }

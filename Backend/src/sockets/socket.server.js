@@ -7,7 +7,12 @@ const messageModel = require("../models/message.model");
 const { createMemory, queryMemory } = require("../services/vector.service");
 
 function initSocketServer(httpServer) {
-  const io = new Server(httpServer, {});
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:5173",
+      credentials: true,
+    },
+  });
 
   io.use(async (socket, next) => {
     const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
@@ -15,18 +20,16 @@ function initSocketServer(httpServer) {
     console.log("Socket connection cookies:", cookies);
 
     if (!cookies.token) {
-      next(new Error("Authetication error: No token provided"));
+      return next(new Error("Authentication error: No token provided"));
     }
 
     try {
       const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
       const user = await userModel.findById(decoded.id);
-
       socket.user = user;
-
       next();
     } catch (error) {
-      next(new Error("Authetication error: Invalid token!"));
+      next(new Error("Authentication error: Invalid token!"));
     }
   });
 
@@ -44,9 +47,7 @@ function initSocketServer(httpServer) {
       const memory = await queryMemory({
         queryVector: vectors,
         limit: 3,
-        metadata: {
-          user: socket.user._id,
-        },
+        metadata: { user: socket.user._id },
       });
 
       await createMemory({
@@ -61,20 +62,16 @@ function initSocketServer(httpServer) {
 
       const chatHistory = (
         await messageModel
-          .find({
-            chat: messagePayload.chat,
-          })
+          .find({ chat: messagePayload.chat })
           .sort({ createdAt: -1 })
           .limit(20)
           .lean()
       ).reverse();
 
-      const stm = chatHistory.map((item) => {
-        return {
-          role: item.role,
-          parts: [{ text: item.content }],
-        };
-      });
+      const stm = chatHistory.map((item) => ({
+        role: item.role,
+        parts: [{ text: item.content }],
+      }));
 
       const ltm =
         memory.length > 0
@@ -83,7 +80,9 @@ function initSocketServer(httpServer) {
                 role: "user",
                 parts: [
                   {
-                    text: `These are some previous messages from the chat, use them as context:\n${memory.map((item) => `- ${item.metadata.text}`).join("\n")}`,
+                    text: `These are some previous messages from the chat, use them as context:\n${memory
+                      .map((item) => `- ${item.metadata.text}`)
+                      .join("\n")}`,
                   },
                 ],
               },
@@ -97,9 +96,6 @@ function initSocketServer(httpServer) {
               },
             ]
           : [];
-
-      console.log(ltm[0]);
-      console.log(stm);
 
       const response = await aiService.generateResponse([...ltm, ...stm]);
 

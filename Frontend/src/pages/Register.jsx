@@ -81,7 +81,7 @@ export default function Register() {
       console.log(err);
       setErrors({ submit: "Registration failed. Please try again." });
     }).finally(() => {
-      setLoading(false); // ✅ always runs
+      setLoading(false); 
     });
   };
 

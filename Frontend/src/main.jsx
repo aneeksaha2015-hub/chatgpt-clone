@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 import './styles/theme.css'
@@ -13,8 +12,16 @@ import ThemeManager from './utils/themeManager.js'
 ThemeManager.initialize()
 ThemeManager.watchSystemPreference()
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+// Lock viewport — prevents layout shift on input focus
+const root = document.getElementById('root');
+const setHeight = () => {
+  root.style.height = `${window.visualViewport.height}px`;
+  root.style.top = `${window.visualViewport.offsetTop}px`;
+};
+setHeight();
+window.visualViewport.addEventListener('resize', setHeight);
+window.visualViewport.addEventListener('scroll', setHeight);
+
+createRoot(root).render(
+  <App />
 )
