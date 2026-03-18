@@ -382,14 +382,28 @@
 /* 🔥 MOBILE FIX */
 @media (max-width: 768px) {
 
+  /* ✅ FIX CONTAINER (MAIN ISSUE) */
   .auth-container {
-    padding: 1rem;
+    min-height: 100dvh;   /* fixes viewport bug */
+    height: auto;
+
+    display: flex;
+    align-items: flex-start;   /* prevents cut */
+    justify-content: center;
+
+    padding: 40px 1rem;   /* better spacing */
+    overflow-y: auto;     /* allow scroll */
   }
 
+  /* ✅ YOUR EXISTING CARD (KEEP + SMALL IMPROVEMENT) */
   .auth-card {
-    max-width: 340px;   /* smaller card */
-    padding: 1.4rem 1.2rem;  /* reduce padding */
+    width: 100%;
+    max-width: 340px;
+    padding: 1.4rem 1.2rem;
     border-radius: 16px;
+
+    /* 🔥 important */
+    margin: 0 auto;
   }
 
   .auth-card h1 {
@@ -422,7 +436,12 @@
   }
 }
 
+/* 🔥 EXTRA SMALL DEVICES */
 @media (max-width: 480px) {
+
+  .auth-container {
+    padding: 32px 0.8rem;
+  }
 
   .auth-card {
     max-width: 300px;
