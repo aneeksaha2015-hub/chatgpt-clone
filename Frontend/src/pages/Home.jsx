@@ -375,12 +375,22 @@ export default function Home({ user, setUser }) {
       <div className={`sidebar ${sidebarCollapsed ? "collapsed" : ""}`}>
         <div className="sidebar-header">
           {!sidebarCollapsed && <span className="sidebar-title">Chats</span>}
+
+          {/* Desktop collapse button */}
           <button
             className="btn-sidebar-toggle desktop-only"
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             title={sidebarCollapsed ? "Expand" : "Collapse"}
           >
             {sidebarCollapsed ? "»" : "«"}
+          </button>
+
+          {/* Mobile close button */}
+          <button
+            className="btn-sidebar-toggle mobile-only"
+            onClick={() => setSidebarCollapsed(true)}
+          >
+            ☰
           </button>
         </div>
 

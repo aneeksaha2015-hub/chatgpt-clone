@@ -2185,3 +2185,29 @@
 .desktop-only {
   display: flex;
 }
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1.4rem !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.8) !important;
+    cursor: pointer;
+  }
+
+  [data-theme="light"] .mobile-only {
+    background: rgba(99, 102, 241, 0.06) !important;
+    border-color: rgba(99, 102, 241, 0.15) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+}

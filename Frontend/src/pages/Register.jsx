@@ -111,7 +111,7 @@ export default function Register({ setUser }) {
         )}
       </button>
 
-      <div className="auth-card">
+      <div className="auth-card register-card">
         <div className="auth-card-logo">
           <div className="auth-logo-icon">✨</div>
         </div>
