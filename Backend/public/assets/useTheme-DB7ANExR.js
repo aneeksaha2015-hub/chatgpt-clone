@@ -1,1 +1,0 @@
-import{a as e,c as t,t as n}from"./index-lW4vRAJn.js";var r=t(e(),1),i=()=>{let[e,t]=(0,r.useState)(()=>n.getTheme());return(0,r.useEffect)(()=>{let e=()=>{t(n.getTheme())};return window.addEventListener(`storage`,e),()=>{window.removeEventListener(`storage`,e)}},[]),{theme:e,toggleTheme:(0,r.useCallback)(()=>{t(n.toggleTheme())},[])}};export{i as t};
